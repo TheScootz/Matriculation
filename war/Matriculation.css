@@ -1,5 +1,8 @@
 /** Add css rules here for your application. */
 
+* {
+  box-sizing: border-box;
+}
 
 /** Example rules used by the template application (remove for your app) */
 h1 {
@@ -17,13 +20,18 @@ h1 {
 .card {
     width: 100px;
     height: 150px;
-    margin: 1em;
+    margin: 2px 0.5em;
     border: 2px solid;
     border-radius: 5px;
 }
 
+.cardWrapper {
+    margin: 1em;
+}
+
 .cardBack {
     border-color: black;
+    background-color: #cdc;
     background-image: url("gradcap.png");
     background-position: center;
     background-repeat: no-repeat;
@@ -42,6 +50,12 @@ h1 {
 /** Most GWT widgets already have a style name defined */
 .gwt-DialogBox {
     width: 400px;
+}
+
+.gwt-Label {
+    margin-bottom: 2px;
+    text-align: center;
+    font: bold 1em sans-serif;
 }
 
 .dialogVPanel {
