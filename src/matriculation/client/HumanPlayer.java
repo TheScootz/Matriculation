@@ -17,11 +17,11 @@ public class HumanPlayer extends Player {
     
     public void takeTurn(Player opponent) {
         char action;
-        int index;
+        int index=0;
         boolean result;
         
         // Get input
-        while (true) { // Loop is broken if valid input is received
+        /*while (true) { // Loop is broken if valid input is received
             try {
                 System.out.print("Enter index of card: ");
                 index = InputReader.readInt();
@@ -38,17 +38,17 @@ public class HumanPlayer extends Player {
                 System.out.println("Invalid index! (Must be between 0 and " + (hand.size() - 1) + ")");
             else if (action == 'P') {
                 if (play(hand.get(index), opponent)) {
-                    System.out.printf("You played [%s]%n%n", hand.get(index).toString());
+                    //System.out.printf("You played [%s]%n%n", hand.get(index).toString());
                     break;
                 }
                 else
                     System.out.println("Play something else.");
             }
             else if (action == 'D') {
-                System.out.printf("You discarded [%s]%n%n", hand.get(index).toString());
+                //System.out.printf("You discarded [%s]%n%n", hand.get(index).toString());
                 break;
             }
-        }
+        }*/
         
         // At this point we've either played a card or we're discarding, so get rid of it
         hand.remove(index);

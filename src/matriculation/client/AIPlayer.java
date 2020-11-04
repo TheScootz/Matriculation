@@ -23,14 +23,14 @@ public class AIPlayer extends Player {
         for (index = 0; index < hand.size(); index++) {
             // End loop if play is valid
             if (play(hand.get(index), opponent)) {
-                System.out.printf("AI played [%s]%n%n", hand.get(index).toString());
+                //System.out.printf("AI played [%s]%n%n", hand.get(index).toString());
                 break;
             }
         }
         // If condition is true, then no card could be played
         // So discard first card instead
         if (index == hand.size()) {
-            System.out.printf("AI discarded [%s]%n%n", hand.get(0).toString());
+            //System.out.printf("AI discarded [%s]%n%n", hand.get(0).toString());
             hand.remove(0);
         }
         else hand.remove(index);

@@ -153,9 +153,13 @@ public abstract class Player {
         System.out.println("Your hand:");
         Iterator<Card> cardIter = hand.iterator();
         for (int i = 0; cardIter.hasNext(); i++) {
-            System.out.printf("%d: [%s]%n", i, cardIter.next().toString());
+            //System.out.printf("%d: [%s]%n", i, cardIter.next().toString());
         }
         System.out.println();
+    }
+    
+    public Pile getHand() {
+        return hand;
     }
     
     /**
@@ -164,9 +168,9 @@ public abstract class Player {
     * exceptions.
     **/
     public void printState() {
-        System.out.printf("Name: %s, Credit-Hours: %d, Setback: %s%n", name, creditHours, Card.SETBACK_NAME[activeSetback]);
-        System.out.printf("Probation: %b, Ogre Prof: %b%n", probation, ogreProf);
-        System.out.printf("Exceptions: %s%n",  exceptionPile.listCards());
+        //System.out.printf("Name: %s, Credit-Hours: %d, Setback: %s%n", name, creditHours, Card.SETBACK_NAME[activeSetback]);
+        //System.out.printf("Probation: %b, Ogre Prof: %b%n", probation, ogreProf);
+        //System.out.printf("Exceptions: %s%n",  exceptionPile.listCards());
     }
     
     /**
