@@ -1,4 +1,5 @@
 package matriculation.client;
+import java.util.logging.*;
 
 /**
 * Implementation of an AI player. Determines what cards to play via computer logic.
@@ -17,22 +18,23 @@ public class AIPlayer extends Player {
     * Currently plays the first valid card, or discards the first card if none are valid.
     * @param opponent The player's opponent.
     **/
-    public void takeTurn(Player opponent) {
+    public int takeTurn(Player opponent) {
+        Logger logger = Logger.getLogger("");
         int index;
-        // Play the first valid card in the hand
+        // First, check if we can win
         for (index = 0; index < hand.size(); index++) {
-            // End loop if play is valid
-            if (play(hand.get(index), opponent)) {
-                //System.out.printf("AI played [%s]%n%n", hand.get(index).toString());
-                break;
+            try {
+                play(hand.get(index), opponent);
+                logger.log(Level.SEVERE, "We got a card!");
+                return index;
+            } catch (InvalidPlayException e) {
+                logger.log(Level.SEVERE, e.getMessage());
+                continue;
             }
         }
         // If condition is true, then no card could be played
         // So discard first card instead
-        if (index == hand.size()) {
-            //System.out.printf("AI discarded [%s]%n%n", hand.get(0).toString());
-            hand.remove(0);
-        }
-        else hand.remove(index);
+        logger.log(Level.SEVERE, "We discarded.");
+        return -1;
     }
 }

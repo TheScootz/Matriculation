@@ -179,8 +179,8 @@ public abstract class Player {
     * @param opponent The card player's opponent.
     * @return True if the play is valid.
     **/
-    public boolean play(Card card, Player opponent) {
-        try {
+    public boolean play(Card card, Player opponent) throws InvalidPlayException {
+        //try {
             switch (card.type) {
             case TERM: 
                 playTerm(card.attribute);
@@ -195,14 +195,13 @@ public abstract class Player {
                 playException(card.attribute);
                 break;
             }
-        } catch (InvalidPlayException e) {
+        /*} catch (InvalidPlayException e) {
             if (isHuman())
                 System.out.println(e.getMessage());
             return false;
-        }
+        }*/
 
         
-        System.out.println();
         return true;
     }
      
@@ -313,13 +312,5 @@ public abstract class Player {
         if (exceptions == 0x1F) addToScore(EXCEPTION_BONUS);
     }
     
-    public abstract void takeTurn(Player opponent);
-}
-
-/**
-* Exception thrown when a player attempts to play a card that breaks the rules. **/
-class InvalidPlayException extends Exception {
-    protected InvalidPlayException(String errorMessage) {
-        super(errorMessage);
-    }
+    public abstract int takeTurn(Player opponent);
 }
