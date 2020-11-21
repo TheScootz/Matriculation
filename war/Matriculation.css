@@ -13,6 +13,11 @@ h1 {
     text-align: center;
 }
 
+.center {
+    margin: auto;
+    text-align: center;
+}
+
 .gameRow {
     margin: auto;
     text-align: center;

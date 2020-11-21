@@ -11,6 +11,7 @@ import com.google.gwt.user.client.ui.FocusPanel;
 import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.CheckBox;
 import com.google.gwt.user.client.ui.TextBox;
+import com.google.gwt.user.client.ui.DialogBox;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.event.dom.client.KeyCodes;
@@ -48,26 +49,37 @@ public class Matriculation implements EntryPoint, ClickHandler, KeyDownHandler, 
     //Button cardButton = new Button("", this);
     //// Player and opponent piles
     FlowPanel playerControlWrapper = new FlowPanel();
-    FlowPanel playerControl = new FlowPanel();
+    FocusPanel playerControl = new FocusPanel();
+    Label playerControlLabel = new Label();
     FlowPanel opponentControlWrapper = new FlowPanel();
-    FlowPanel opponentControl = new FlowPanel();
+    FocusPanel opponentControl = new FocusPanel();
+    Label opponentControlLabel = new Label();
     FlowPanel playerCreditHourWrapper = new FlowPanel();
-    FlowPanel playerCreditHour = new FlowPanel();
+    FocusPanel playerCreditHour = new FocusPanel();
+    Label playerCreditHourLabel = new Label();
     FlowPanel opponentCreditHourWrapper = new FlowPanel();
-    FlowPanel opponentCreditHour = new FlowPanel();
+    FocusPanel opponentCreditHour = new FocusPanel();
+    Label opponentCreditHourLabel = new Label();
     FlowPanel playerProbationWrapper = new FlowPanel();
-    FlowPanel playerProbation = new FlowPanel();
+    FocusPanel playerProbation = new FocusPanel();
+    Label playerProbationLabel = new Label();
     FlowPanel opponentProbationWrapper = new FlowPanel();
-    FlowPanel opponentProbation = new FlowPanel();
+    FocusPanel opponentProbation = new FocusPanel();
+    Label opponentProbationLabel = new Label();
     FlowPanel playerExceptionWrapper = new FlowPanel();
-    FlowPanel playerException = new FlowPanel();
+    FocusPanel playerException = new FocusPanel();
+    Label playerExceptionLabel = new Label();
     FlowPanel opponentExceptionWrapper = new FlowPanel();
-    FlowPanel opponentException = new FlowPanel();
+    FocusPanel opponentException = new FocusPanel();
+    Label opponentExceptionLabel = new Label();
+    DialogBox pileDialog = new DialogBox(true);
+    HTML pileDialogContents = new HTML();
     
     //// Deck and discard pile
     FlowPanel deckWrapper = new FlowPanel();
     FlowPanel deck = new FlowPanel();
-    FlowPanel discard = new FlowPanel();
+    FlowPanel discardPanel = new FlowPanel();
+    Label discardLabel = new Label();
     Label countRemaining = new Label("Remaining: 0");
     
     //// Player info
@@ -89,6 +101,9 @@ public class Matriculation implements EntryPoint, ClickHandler, KeyDownHandler, 
     HorizontalPanel endAfterPanel = new HorizontalPanel();
     TextBox endAfterTextBox = new TextBox();
     Label endAfterLabel = new Label("End after this many turns (takes effect at end of round)");
+    HorizontalPanel startingCreditHoursPanel = new HorizontalPanel();
+    TextBox startingCreditHoursTextBox = new TextBox();
+    Label startingCreditHoursLabel = new Label("Start with this many credit hours (takes effect at game start)");
     
     // The game elements themselves
     /** Determines whether the other player's cards should be printed. False by default **/
@@ -103,16 +118,21 @@ public class Matriculation implements EntryPoint, ClickHandler, KeyDownHandler, 
     public int startingCreditHours;
     
     
+    /** True when there is currently a game being played. **/
+    private boolean gameActive;
     /** The deck from which cards are drawn. **/
     private Deck stock;
+    /** The most recently discarded card. **/
+    private Card discard;
     /** The human player. **/
     private HumanPlayer human;
     /** The AI player. **/
     private AIPlayer ai;
     /** Number of turns that have passed so far. **/
     private int turns;
+    /** True when the game is waiting for the local player to take an action. **/
     private boolean waitingForPlayer;
-    private boolean gameActive;
+    /** Logger to write to the JavaScript console. **/
     Logger logger = Logger.getLogger("");
     
     /**
@@ -127,6 +147,7 @@ public class Matriculation implements EntryPoint, ClickHandler, KeyDownHandler, 
         ai = new AIPlayer(startingCreditHours);
         waitingForPlayer = false;
         gameActive = true;
+        discard = null;
         
         for (int i = 0; i < Player.HANDSIZE; i++) {
             human.hand.add(stock.draw());
@@ -158,8 +179,11 @@ public class Matriculation implements EntryPoint, ClickHandler, KeyDownHandler, 
     **/
     public void endRound() {
         // Check for winner
-        if (human.getCreditHours() >= Player.MAX_CREDITHOURS)
+        if (human.getCreditHours() >= Player.MAX_CREDITHOURS) {
             endGame(human, true);
+            updateDisplay();
+            return;
+        }
         
         // Draw if there are still cards in the deck
         try {
@@ -172,14 +196,24 @@ public class Matriculation implements EntryPoint, ClickHandler, KeyDownHandler, 
             int aiPlayed = ai.takeTurn(human);
             if (aiPlayed >= 0) {
                 putStatus("AI played " + ai.hand.get(aiPlayed).toString(), true);
+                addToPile(ai.hand.get(aiPlayed), ai, human);
                 ai.hand.remove(aiPlayed);
+            }
+            else {
+                int discardedIndex = -aiPlayed - 1;
+                putStatus("AI discarded.", true);
+                discard = ai.hand.get(discardedIndex);
+                ai.hand.remove(discardedIndex);
             }
             updateDisplay();
         }
         
         // Check for winner
-        if (ai.getCreditHours() >= Player.MAX_CREDITHOURS)
+        if (ai.getCreditHours() >= Player.MAX_CREDITHOURS) {
             endGame(ai, true);
+            updateDisplay();
+            return;
+        }
         
         // Draw if there are still cards in the deck
         try {
@@ -193,7 +227,8 @@ public class Matriculation implements EntryPoint, ClickHandler, KeyDownHandler, 
             endGame(human, false);
         else if (stock.size() == 0 && ai.hand.size() == 0 && human.hand.size() == 0)
             endGame(human, false);
-        else
+        
+        if (gameActive)
             startRound();
     }
     
@@ -204,6 +239,8 @@ public class Matriculation implements EntryPoint, ClickHandler, KeyDownHandler, 
     * @param graduated True if the game ended via a player graduating.
     **/
     public void endGame(Player ender, boolean graduated) {
+        gameActive = false;
+        
         // Display who graduated
         if (graduated) {
             //System.out.printf("%s has reached %d credit-hours and graduated. Game over!%n%n", ender.name, Player.MAX_CREDITHOURS);
@@ -213,16 +250,38 @@ public class Matriculation implements EntryPoint, ClickHandler, KeyDownHandler, 
         }
         // Otherwise no one graduated
         else 
-            logger.log(Level.SEVERE, "There are no more cards. Game over!\n");
+            putStatus("There are no more cards. Game over!", true);
         
         // Declare a winner
         if (human.getScore() > ai.getScore())
-            logger.log(Level.SEVERE, human.getName() + " wins!");
+            putStatus(human.getName() + " wins!", true);
         else if (human.getScore() < ai.getScore())
-            logger.log(Level.SEVERE, ai.getName() + " wins!");
+            putStatus(ai.getName() + " wins!", false);
         else
-            logger.log(Level.SEVERE, "There was a tie! Everyone wins :)");
+            putStatus("There was a tie! Everyone wins :)", true);
     }
+    
+    public void addToPile(Card card, Player player, Player opponent) {
+        if (card.type == Card.Type.TERM)
+            player.creditHourPile.add(card);
+        else if (card.type == Card.Type.SETBACK)
+            if (card.attribute == Card.OGREPROF)
+                opponent.creditHourPile.add(card);
+            else if (card.attribute == Card.PROBATION)
+                opponent.probationPile.add(card);
+            else
+                opponent.controlPile.add(card);
+        else if (card.type == Card.Type.FIX)
+            if (card.attribute == Card.OGREPROF)
+                player.creditHourPile.add(card);
+            else if (card.attribute == Card.PROBATION)
+                player.probationPile.add(card);
+            else
+                player.controlPile.add(card);
+        else if (card.type == Card.Type.EXCEPTION)
+            player.exceptionPile.add(card);
+    }
+    
     
     public void onClick(ClickEvent event) {
         if (event.getSource() == gameStartButton)
@@ -231,6 +290,23 @@ public class Matriculation implements EntryPoint, ClickHandler, KeyDownHandler, 
             showOpponentCards = showOpponentCardsCheckBox.getValue();
             updateDisplay();
         }
+        // if they clicked on a pile
+        else if (event.getSource() == playerControl)
+            showPileContents(human.controlPile, human, "Control");
+        else if (event.getSource() == opponentControl)
+            showPileContents(ai.controlPile, ai, "Control");
+        else if (event.getSource() == playerCreditHour)
+            showPileContents(human.creditHourPile, human, "Credit-Hour");
+        else if (event.getSource() == opponentCreditHour)
+            showPileContents(ai.creditHourPile, ai, "Credit-Hour");
+        else if (event.getSource() == playerProbation)
+            showPileContents(human.probationPile, human, "Probation");
+        else if (event.getSource() == opponentProbation)
+            showPileContents(ai.probationPile, ai, "Probation");
+        else if (event.getSource() == playerControl)
+            showPileContents(human.exceptionPile, human, "Exception");
+        else if (event.getSource() == opponentControl)
+            showPileContents(ai.exceptionPile, ai, "Exception");
         else if (playerCards.contains(event.getSource())
             && !((FocusPanel)event.getSource()).getStyleName().contains("emptyCard")
             && waitingForPlayer) {   // if it's a player card, make sure it's not empty
@@ -238,6 +314,7 @@ public class Matriculation implements EntryPoint, ClickHandler, KeyDownHandler, 
             try {
                 human.play(human.hand.get(i), ai);
                 putStatus("You played " + human.hand.get(i).toString(), true);
+                addToPile(human.hand.get(i), human, ai);
                 human.hand.remove(i);
                 waitingForPlayer = false;
                 endRound();
@@ -246,7 +323,6 @@ public class Matriculation implements EntryPoint, ClickHandler, KeyDownHandler, 
             }
         }
     }
-    
     public void onKeyDown(KeyDownEvent event) {
         if (event.getSource() == gameStartButton && event.getNativeKeyCode() == KeyCodes.KEY_ENTER)
             startGame();
@@ -256,7 +332,10 @@ public class Matriculation implements EntryPoint, ClickHandler, KeyDownHandler, 
             && !((FocusPanel)event.getSource()).getStyleName().contains("emptyCard")
             && waitingForPlayer
             && event.getNativeKeyCode() == KeyCodes.KEY_D) {   // if it's a player card, make sure it's not empty
-            human.hand.remove(playerCards.indexOf(event.getSource()));
+            int i = playerCards.indexOf(event.getSource());
+            putStatus("You discarded.", true);
+            discard = human.hand.get(i);
+            human.hand.remove(i);
             waitingForPlayer = false;
             endRound();
         }
@@ -267,6 +346,14 @@ public class Matriculation implements EntryPoint, ClickHandler, KeyDownHandler, 
             // update as textbox is updated
             try {
                 endAfter = Integer.parseInt(endAfterTextBox.getValue());
+            } catch (NumberFormatException e) {
+                logger.log(Level.SEVERE, e.getMessage());
+            }
+        }
+        else if (event.getSource() == startingCreditHoursTextBox) {
+            // update as textbox is updated
+            try {
+                startingCreditHours = Integer.parseInt(startingCreditHoursTextBox.getValue());
             } catch (NumberFormatException e) {
                 logger.log(Level.SEVERE, e.getMessage());
             }
@@ -287,6 +374,12 @@ public class Matriculation implements EntryPoint, ClickHandler, KeyDownHandler, 
             }
         }
         
+        // PLAYER PILES
+        updatePile(human.controlPile, playerControl, playerControlLabel);
+        updatePile(human.creditHourPile, playerCreditHour, playerCreditHourLabel);
+        updatePile(human.probationPile, playerProbation, playerProbationLabel);
+        updatePile(human.exceptionPile, playerException, playerExceptionLabel);
+        
         // OPPONENT CARDS
         hand = ai.getHand();
         for (int i = 0; i < Player.HANDSIZE; ++i) {
@@ -301,18 +394,55 @@ public class Matriculation implements EntryPoint, ClickHandler, KeyDownHandler, 
                 }
             }
             else {
+                opponentCardLabels.get(i).setText("");
                 opponentCards.get(i).setStyleName("card emptyCard");
             }
         }
         
+        // OPPONENT PILES
+        updatePile(ai.controlPile, opponentControl, opponentControlLabel);
+        updatePile(ai.creditHourPile, opponentCreditHour, opponentCreditHourLabel);
+        updatePile(ai.probationPile, opponentProbation, opponentProbationLabel);
+        updatePile(ai.exceptionPile, opponentException, opponentExceptionLabel);
+        
         // DECK
         countRemaining.setText("Remaining: " + stock.size());
+        
+        // DISCARD
+        if (discard != null) {
+            discardLabel.setText(discard.toString());
+            discardPanel.setStyleName("card");
+        }
+        else {
+            discardLabel.setText("");
+            discardPanel.setStyleName("card emptyCard");
+        }
         
         // SCORES
         playerCHTotal.setText("Credit-Hours: " + human.getCreditHours());
         playerScore.setText("Score: " + human.getScore());
         opponentCHTotal.setText("Credit-Hours: " + ai.getCreditHours());
         opponentScore.setText("Score: " + ai.getScore());
+    }
+    
+    public void updatePile(Pile pile, FocusPanel pilePanel, Label pileLabel) {
+        Card top = pile.top();
+        if (top == null) {
+            pileLabel.setText("");
+            pilePanel.setStyleName("card emptyCard");
+        }
+        else {
+            pileLabel.setText(top.toString());
+            pilePanel.setStyleName("card");
+        }
+    }
+    
+    public void showPileContents(Pile pile, Player owner, String name) {
+        if (pile.size() == 0) return;
+        
+        pileDialog.setText("Contents of " + owner.getName() + "'s " + name + " Pile");
+        pileDialogContents.setHTML(pile.listCardsHTML());
+        pileDialog.show();
     }
     
     private void putStatus(String message, boolean good) {
@@ -367,72 +497,81 @@ public class Matriculation implements EntryPoint, ClickHandler, KeyDownHandler, 
         
         // Set up piles
         //// CONTROL
-        playerControl.add(new HTML(""));
+        playerControl.add(playerControlLabel);
         playerControl.addStyleName("card emptyCard");
+        playerControl.addClickHandler(this);
         playerControlWrapper.add(new Label("Control"));
         playerControlWrapper.add(playerControl);
         playerControlWrapper.addStyleName("cardWrapper");
         playerPileArea.add(playerControlWrapper);
         
-        opponentControl.add(new HTML(""));
+        opponentControl.add(opponentControlLabel);
         opponentControl.addStyleName("card emptyCard");
+        opponentControl.addClickHandler(this);
         opponentControlWrapper.add(new Label("Control"));
         opponentControlWrapper.add(opponentControl);
         opponentControlWrapper.addStyleName("cardWrapper");
         opponentPileArea.add(opponentControlWrapper);
         
         //// CREDIT-HOURS
-        playerCreditHour.add(new HTML(""));
+        playerCreditHour.add(playerCreditHourLabel);
         playerCreditHour.addStyleName("card emptyCard");
+        playerCreditHour.addClickHandler(this);
         playerCreditHourWrapper.add(new Label("Credit-Hours"));
         playerCreditHourWrapper.add(playerCreditHour);
         playerCreditHourWrapper.addStyleName("cardWrapper");
         playerPileArea.add(playerCreditHourWrapper);
         
-        opponentCreditHour.add(new HTML(""));
+        opponentCreditHour.add(opponentCreditHourLabel);
         opponentCreditHour.addStyleName("card emptyCard");
+        opponentCreditHour.addClickHandler(this);
         opponentCreditHourWrapper.add(new Label("Credit-Hours"));
         opponentCreditHourWrapper.add(opponentCreditHour);
         opponentCreditHourWrapper.addStyleName("cardWrapper");
         opponentPileArea.add(opponentCreditHourWrapper);
         
         //// PROBATION
-        playerProbation.add(new HTML(""));
+        playerProbation.add(playerProbationLabel);
         playerProbation.addStyleName("card emptyCard");
+        playerProbation.addClickHandler(this);
         playerProbationWrapper.add(new Label("Probation"));
         playerProbationWrapper.add(playerProbation);
         playerProbationWrapper.addStyleName("cardWrapper");
         playerPileArea.add(playerProbationWrapper);
         
-        opponentProbation.add(new HTML(""));
+        opponentProbation.add(opponentProbationLabel);
         opponentProbation.addStyleName("card emptyCard");
+        opponentProbation.addClickHandler(this);
         opponentProbationWrapper.add(new Label("Probation"));
         opponentProbationWrapper.add(opponentProbation);
         opponentProbationWrapper.addStyleName("cardWrapper");
         opponentPileArea.add(opponentProbationWrapper);
         
         //// EXCEPTIONS
-        playerException.add(new HTML(""));
+        playerException.add(playerExceptionLabel);
         playerException.addStyleName("card emptyCard");
+        playerException.addClickHandler(this);
         playerExceptionWrapper.add(new Label("Exceptions"));
         playerExceptionWrapper.add(playerException);
         playerExceptionWrapper.addStyleName("cardWrapper");
         playerPileArea.add(playerExceptionWrapper);
         
-        opponentException.add(new HTML(""));
+        opponentException.add(opponentExceptionLabel);
         opponentException.addStyleName("card emptyCard");
+        opponentException.addClickHandler(this);
         opponentExceptionWrapper.add(new Label("Exceptions"));
         opponentExceptionWrapper.add(opponentException);
         opponentExceptionWrapper.addStyleName("cardWrapper");
         opponentPileArea.add(opponentExceptionWrapper);
         
         
-        // Set up draw and discard piles
+        // Set up draw and discardPanel piles
         deck.addStyleName("card cardBack");
         deckWrapper.add(deck);
         deckWrapper.add(countRemaining);
         deckWrapper.addStyleName("cardWrapper");
-        discard.addStyleName("card emptyCard");
+        discardPanel.add(discardLabel);
+        discardPanel.addStyleName("card emptyCard");
         
         // Set up player info
         playerName.addStyleName("playerName");
@@ -448,32 +587,46 @@ public class Matriculation implements EntryPoint, ClickHandler, KeyDownHandler, 
         
         drawDiscard.add(playerInfo);
         drawDiscard.add(deckWrapper);
-        drawDiscard.add(discard);
+        drawDiscard.add(discardPanel);
         drawDiscard.add(opponentInfo);
         drawDiscard.addStyleName("gameRow");
         
         // Set up the start button
         gameStartButton.addClickHandler(this);
         gameStartButton.addKeyDownHandler(this);
-        
         status.add(gameStartButton);
         status.addStyleName("statusRow");
+        
+        // Set up dialog box showing pile contents
+        pileDialog.add(pileDialogContents);
+        pileDialog.hide(true);
         
         // Add the panels to the page
         gameArea.add(opponentArea);
         gameArea.add(drawDiscard);
         gameArea.add(playerArea);
         gameArea.add(status);
+        gameArea.add(pileDialog);
         RootPanel.get().add(gameArea);
+        
         
         // Set up cheat panel
         cheatPanel.add(showOpponentCardsCheckBox);
         cheatPanel.addStyleName("statusRow");
         showOpponentCardsCheckBox.addClickHandler(this);
-        endAfterPanel.add(endAfterTextBox);
-        endAfterPanel.add(endAfterLabel);
+        endAfterTextBox.setValue("0");
         endAfterTextBox.addKeyUpHandler(this);
         endAfterTextBox.setVisibleLength(2);
+        endAfterPanel.add(endAfterTextBox);
+        endAfterPanel.add(endAfterLabel);
+        endAfterPanel.addStyleName("center");
         cheatPanel.add(endAfterPanel);
+        startingCreditHoursTextBox.setValue("0");
+        startingCreditHoursTextBox.addKeyUpHandler(this);
+        startingCreditHoursTextBox.setVisibleLength(3);
+        startingCreditHoursPanel.add(startingCreditHoursTextBox);
+        startingCreditHoursPanel.add(startingCreditHoursLabel);
+        startingCreditHoursPanel.addStyleName("center");
+        cheatPanel.add(startingCreditHoursPanel);
     }
 }

@@ -84,7 +84,7 @@ public abstract class Player {
     **/
     protected Player(int startingCreditHours) {
         creditHours = startingCreditHours;
-        score = 0;
+        score = startingCreditHours * CREDITHOUR_VALUE;
         activeSetback = SB_NONE;
         ogreProf = false;
         probation = false;
