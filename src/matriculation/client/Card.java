@@ -33,8 +33,16 @@ public class Card {
     public static final int OGREPROF = 5;
     
     /** An array that matches each setback value to its printable string. **/
-    public static final String[] SETBACK_NAME = {"None", "Caught Cheating",
+    public static final String[] SETBACK_NAME = {"", "Caught Cheating",
     "Car Not Working", "Alarm Clock Broken", "Probation", "Ogre Prof"};
+    
+    /** An array that matches each fix value to its printable string. **/
+    public static final String[] FIX_NAME = {"", "Reinstated",
+    "Car Fixed", "New Alarm Clock", "GPA OK", "Princess Fiona"};
+    
+    /** An array that matches each exception value to its printable string. **/
+    public static final String[] EXCEPTION_NAME = {"", "Sainthood",
+    "Golden Car", "Bulletproof Alarm Clock", "Straight A's", "Teacher's Pet"};
     
     /** The type of card. **/
     public final Type type;
@@ -64,16 +72,14 @@ public class Card {
         if (type == Type.TERM)
             return Integer.toString(attribute) + " Credit-Hours";
         else {
-            StringBuilder output = new StringBuilder();
             
             switch (type) {
-                case SETBACK: output.append("Setback: "); break;
-                case FIX: output.append("Fix: "); break;
-                case EXCEPTION: output.append("Exception: "); break;
+                case SETBACK: return SETBACK_NAME[attribute];
+                case FIX: return FIX_NAME[attribute];
+                case EXCEPTION: return EXCEPTION_NAME[attribute];
             }
-            output.append(SETBACK_NAME[attribute]);
             
-            return output.toString();
+            return "";
         }
     }
     

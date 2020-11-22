@@ -28,7 +28,7 @@ import java.util.logging.Logger;
 * This class handles actual game flow, making the players take their turns,
 * creating and updating the UI, deciding when the game is over, and determining
 * the winner.
-* NB: I tried to make the controller and the UI separate classes and got an error I couldn't trace because the browser stack traces are useless
+* <p>NB: I tried to make the controller and the UI separate classes and got an error I couldn't trace because the browser stack traces are useless</p>
 *
 * @author Emre Shively
 * @version 1.0.0
@@ -147,6 +147,10 @@ public class Matriculation implements EntryPoint, ClickHandler, KeyDownHandler, 
     Label playerCHTotal = new Label("Credit-Hours: 0");
     /** Label containing the player's score **/
     Label playerScore = new Label("Score: 0");
+    /** Label containing player's probation status **/
+    Label playerProbationStatus = new Label("Probation: NO");
+    /** Label containing player's ogre prof status **/
+    Label playerOgreProfStatus = new Label("Ogre Prof: NO");
     /** Panel containing the opponent's info  **/
     FlowPanel opponentInfo = new FlowPanel();
     /** Label containing the opponent's name **/
@@ -155,6 +159,10 @@ public class Matriculation implements EntryPoint, ClickHandler, KeyDownHandler, 
     Label opponentCHTotal = new Label("Credit-Hours: 0");
     /** Label containing the opponent's score **/
     Label opponentScore = new Label("Score: 0");
+    /** Label containing opponent's probation status **/
+    Label opponentProbationStatus = new Label("Probation: NO");
+    /** Label containing opponent's ogre prof status **/
+    Label opponentOgreProfStatus = new Label("Ogre Prof: NO");
     
     /** Panel containing status messages **/
     FlowPanel status = new FlowPanel();
@@ -525,7 +533,15 @@ public class Matriculation implements EntryPoint, ClickHandler, KeyDownHandler, 
         // SCORES
         playerCHTotal.setText("Credit-Hours: " + human.getCreditHours());
         playerScore.setText("Score: " + human.getScore());
+        playerProbationStatus.setText("Probation: " + (human.probation ? "YES" : "NO"));
+        playerProbationStatus.setStyleName("gwt-Label " + (human.probation ? "badMessage" : "goodMessage"));
+        playerOgreProfStatus.setText("Ogre Prof: " + (human.ogreProf ? "YES" : "NO"));
+        playerOgreProfStatus.setStyleName("gwt-Label " + (human.ogreProf ? "badMessage" : "goodMessage"));
         opponentCHTotal.setText("Credit-Hours: " + ai.getCreditHours());
+        opponentProbationStatus.setText("Probation: " + (ai.probation ? "YES" : "NO"));
+        opponentProbationStatus.setStyleName("gwt-Label " + (ai.probation ? "badMessage" : "goodMessage"));
+        opponentOgreProfStatus.setText("Ogre Prof: " + (ai.ogreProf ? "YES" : "NO"));
+        opponentOgreProfStatus.setStyleName("gwt-Label " + (ai.ogreProf ? "badMessage" : "goodMessage"));
         opponentScore.setText("Score: " + ai.getScore());
     }
     
@@ -704,11 +720,19 @@ public class Matriculation implements EntryPoint, ClickHandler, KeyDownHandler, 
         playerInfo.add(playerName);
         playerInfo.add(playerCHTotal);
         playerInfo.add(playerScore);
+        playerProbationStatus.addStyleName("goodMessage");
+        playerInfo.add(playerProbationStatus);
+        playerOgreProfStatus.addStyleName("goodMessage");
+        playerInfo.add(playerOgreProfStatus);
         playerInfo.addStyleName("playerInfo");
         opponentName.addStyleName("playerName");
         opponentInfo.add(opponentName);
         opponentInfo.add(opponentCHTotal);
         opponentInfo.add(opponentScore);
+        opponentProbationStatus.addStyleName("goodMessage");
+        opponentInfo.add(opponentProbationStatus);
+        opponentOgreProfStatus.addStyleName("goodMessage");
+        opponentInfo.add(opponentOgreProfStatus);
         opponentInfo.addStyleName("playerInfo");
         
         drawDiscard.add(playerInfo);
