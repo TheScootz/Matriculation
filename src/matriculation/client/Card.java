@@ -76,4 +76,19 @@ public class Card {
             return output.toString();
         }
     }
+    
+    /**
+    * Determines the CSS class that should be applied to the card.
+    * TODO: Get better styles
+    * @return name of the class, for use with addStyleName
+    **/
+    public String style() {
+        switch (type) {
+            case TERM: return "card-term";
+            case SETBACK: return "card-setback";
+            case FIX: return "card-fix";
+            case EXCEPTION: return "card-exception";
+        }
+        return "";
+    }
 }

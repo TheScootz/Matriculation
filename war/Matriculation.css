@@ -41,6 +41,22 @@ h1 {
     background-size: contain;
 }
 
+.card-term {
+    color: blue;
+}
+
+.card-setback {
+    color: #c00;
+}
+
+.card-fix {
+    color: green;
+}
+
+.card-exception {
+    color: orange;
+}
+
 .cardWrapper {
     margin: 1em;
 }

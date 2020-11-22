@@ -25,6 +25,10 @@ public class Pile {
         return cards.size();
     }
     
+    public int indexOf(Card card) {
+        return cards.indexOf(card);
+    }
+    
     public void add(Card card) {
         cards.add(card);
     }
@@ -44,8 +48,8 @@ public class Pile {
     }
     
     /**
-    * Print a human-readable list of cards in the pile to stdout.
-    * @return String The list.
+    * Create an HTML <ul> list of cards in the pile, from top to bottom (i.e. reverse order).
+    * @return String The HTML list
     **/
     public String listCardsHTML() {
         ListIterator<Card> cardIter = cards.listIterator(size());

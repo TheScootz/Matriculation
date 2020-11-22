@@ -93,7 +93,7 @@ public class Matriculation implements EntryPoint, ClickHandler, KeyDownHandler, 
     Label opponentScore = new Label("Score: 0");
     
     FlowPanel status = new FlowPanel();
-    Button gameStartButton = new Button("Start");
+    Button gameStartButton = new Button("Start New Game");
     Label statusMessage = new Label();
     
     FlowPanel cheatPanel = new FlowPanel();
@@ -259,6 +259,8 @@ public class Matriculation implements EntryPoint, ClickHandler, KeyDownHandler, 
             putStatus(ai.getName() + " wins!", false);
         else
             putStatus("There was a tie! Everyone wins :)", true);
+        
+        status.add(gameStartButton);
     }
     
     public void addToPile(Card card, Player player, Player opponent) {
@@ -303,9 +305,9 @@ public class Matriculation implements EntryPoint, ClickHandler, KeyDownHandler, 
             showPileContents(human.probationPile, human, "Probation");
         else if (event.getSource() == opponentProbation)
             showPileContents(ai.probationPile, ai, "Probation");
-        else if (event.getSource() == playerControl)
+        else if (event.getSource() == playerException)
             showPileContents(human.exceptionPile, human, "Exception");
-        else if (event.getSource() == opponentControl)
+        else if (event.getSource() == opponentException)
             showPileContents(ai.exceptionPile, ai, "Exception");
         else if (playerCards.contains(event.getSource())
             && !((FocusPanel)event.getSource()).getStyleName().contains("emptyCard")
@@ -367,6 +369,7 @@ public class Matriculation implements EntryPoint, ClickHandler, KeyDownHandler, 
             if (i < hand.size()) {
                 playerCardLabels.get(i).setText(hand.get(i).toString());
                 playerCards.get(i).setStyleName("card");
+                playerCards.get(i).addStyleName(hand.get(i).style());
             }
             else {
                 playerCardLabels.get(i).setText("");
@@ -387,6 +390,7 @@ public class Matriculation implements EntryPoint, ClickHandler, KeyDownHandler, 
                 if (showOpponentCards) {
                     opponentCardLabels.get(i).setText(hand.get(i).toString());
                     opponentCards.get(i).setStyleName("card");
+                    opponentCards.get(i).addStyleName(hand.get(i).style());
                 }
                 else {
                     opponentCardLabels.get(i).setText("");
@@ -412,6 +416,7 @@ public class Matriculation implements EntryPoint, ClickHandler, KeyDownHandler, 
         if (discard != null) {
             discardLabel.setText(discard.toString());
             discardPanel.setStyleName("card");
+            discardPanel.addStyleName(discard.style());
         }
         else {
             discardLabel.setText("");
@@ -434,6 +439,7 @@ public class Matriculation implements EntryPoint, ClickHandler, KeyDownHandler, 
         else {
             pileLabel.setText(top.toString());
             pilePanel.setStyleName("card");
+            pilePanel.addStyleName(top.style());
         }
     }
     

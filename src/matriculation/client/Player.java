@@ -45,6 +45,8 @@ public abstract class Player {
     public static final int EX_OGREPROF = 0x10;
     /** Bitmask flag of {@link #exceptions} for all exceptions. **/
     public static final int EX_ALL = 0x1F;
+    /** Array that associates setbacks with their respective exceptions. **/
+    public static final int[] EX_ARRAY = {0x00, EX_CHEATING, EX_NOCAR, EX_NOALARM, EX_PROBATION, EX_OGREPROF};
     
     /** Value of {@link #activeSetback} when no control setbacks are active. **/
     public static final int SB_NONE = 0;
@@ -139,7 +141,7 @@ public abstract class Player {
     
     /**
     * Returns whether the player is human.
-    * @return True is the player is human, false if AI.
+    * @return true if the player is human, false if AI.
     **/
     public boolean isHuman() {
         return human;
@@ -160,6 +162,15 @@ public abstract class Player {
     
     public Pile getHand() {
         return hand;
+    }
+    
+    /**
+    * Returns whether the player has the given exception.
+    * @param exception to check for, given as a constant from {@link Card}
+    * @return true if the player has the exception for the setback value given
+    **/
+    public boolean hasException(int setback) {
+        return (exceptions & EX_ARRAY[setback]) != 0x00;
     }
     
     /**
@@ -233,11 +244,7 @@ public abstract class Player {
     **/
     private void playSetback(int setback, Player target) throws InvalidPlayException {
         // Check if the target has the relevant exception
-        if (setback == Card.CHEATING && (target.exceptions & EX_CHEATING) != 0x00
-         || setback == Card.NOCAR && (target.exceptions & EX_NOCAR) != 0x00
-         || setback == Card.NOALARM && (target.exceptions & EX_NOALARM) != 0x00
-         || setback == Card.PROBATION && (target.exceptions & EX_PROBATION) != 0x00
-         || setback == Card.OGREPROF && (target.exceptions & EX_OGREPROF) != 0x00)
+        if (target.hasException(setback))
             throw new InvalidPlayException("Your opponent has an exception for that setback.");
         // Cannot play the setback if the target has an active control setback
         // Or for probation and ogre prof, if they are already active
@@ -252,7 +259,7 @@ public abstract class Player {
             target.ogreProf = true;
         else
             target.activeSetback = setback;
-        System.out.println("Your opponent now has setback " + target.activeSetback + ".");
+        //System.out.println("Your opponent now has setback " + target.activeSetback + ".");
     }
 
     /**
@@ -307,7 +314,6 @@ public abstract class Player {
                 break;
         }
         
-        System.out.println("You are now excepted from that setback.");
         addToScore(EXCEPTION_VALUE);
         if (exceptions == 0x1F) addToScore(EXCEPTION_BONUS);
     }
