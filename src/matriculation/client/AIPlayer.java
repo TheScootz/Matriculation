@@ -11,6 +11,9 @@ import java.util.Iterator;
 * @version 1.0.0
 **/
 public class AIPlayer extends Player {
+    /** Creates the player
+    * @param startingCreditHours number of credit-hours to start with
+    **/
     protected AIPlayer(int startingCreditHours) {
         super(startingCreditHours);
         name = "AI";

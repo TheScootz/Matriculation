@@ -8,12 +8,16 @@ import Input.InputReader;
 * @author Emre Shively
 * @version 1.0.0
 **/
-public class HumanPlayer extends Player {    
+public class HumanPlayer extends Player {
+    /** Creates the player
+    * @param startingCreditHours number of credit-hours to start with
+    **/
     protected HumanPlayer(int startingCreditHours) {
         super(startingCreditHours);
         name = "Human";
         human = true;
     }
     
+    /** Dummy function because the interface requires it, handled in {@link Matriculation#onClick} **/
     public int takeTurn(Player opponent) { return -1; }
 }

@@ -2,7 +2,7 @@ package matriculation.client;
 
 /**
 * An object representing a physical card in the game.
-* Each card is of a category from {@link #Type} and contains additional information
+* Each card is of a category from {@link Card.Type} and contains additional information
 * depending on the type.
 *
 * @author Emre Shively

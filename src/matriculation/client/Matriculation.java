@@ -1,17 +1,6 @@
 package matriculation.client;
 
-import java.util.NoSuchElementException;
 import com.google.gwt.core.client.EntryPoint;
-import com.google.gwt.user.client.ui.Button;
-import com.google.gwt.user.client.ui.HTML;
-import com.google.gwt.user.client.ui.Label;
-import com.google.gwt.user.client.ui.RootPanel;
-import com.google.gwt.user.client.ui.FlowPanel;
-import com.google.gwt.user.client.ui.FocusPanel;
-import com.google.gwt.user.client.ui.HorizontalPanel;
-import com.google.gwt.user.client.ui.CheckBox;
-import com.google.gwt.user.client.ui.TextBox;
-import com.google.gwt.user.client.ui.DialogBox;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.event.dom.client.KeyCodes;
@@ -19,90 +8,176 @@ import com.google.gwt.event.dom.client.KeyDownEvent;
 import com.google.gwt.event.dom.client.KeyDownHandler;
 import com.google.gwt.event.dom.client.KeyUpEvent;
 import com.google.gwt.event.dom.client.KeyUpHandler;
+import com.google.gwt.user.client.ui.Button;
+import com.google.gwt.user.client.ui.CheckBox;
+import com.google.gwt.user.client.ui.DialogBox;
+import com.google.gwt.user.client.ui.FlowPanel;
+import com.google.gwt.user.client.ui.FocusPanel;
+import com.google.gwt.user.client.ui.HTML;
+import com.google.gwt.user.client.ui.HorizontalPanel;
+import com.google.gwt.user.client.ui.Label;
+import com.google.gwt.user.client.ui.RootPanel;
+import com.google.gwt.user.client.ui.TextBox;
 import java.util.ArrayList;
-import java.util.logging.Logger;
+import java.util.NoSuchElementException;
 import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
- * Entry point classes define <code>onModuleLoad()</code>.
- */
+* Controller and UI class for the game.
+* This class handles actual game flow, making the players take their turns,
+* creating and updating the UI, deciding when the game is over, and determining
+* the winner.
+* NB: I tried to make the controller and the UI separate classes and got an error I couldn't trace because the browser stack traces are useless
+*
+* @author Emre Shively
+* @version 1.0.0
+**/
 public class Matriculation implements EntryPoint, ClickHandler, KeyDownHandler, KeyUpHandler {
     // Create the various panels and widgets we will be using.
     
-    //// Main panel that will have the dynamic contents inside of it
+    /** Main panel that will have the dynamic contents inside of it **/
     FlowPanel gameArea = new FlowPanel();
     
+    
     //// Create the 3 play areas: player's, opponent's, and neutral
+    /** Player's play area **/
     FlowPanel playerArea = new FlowPanel();
+    /** Deck, discard pile, and players' information **/
     HorizontalPanel drawDiscard = new HorizontalPanel();
+    /** Opponent's play area **/
     FlowPanel opponentArea = new FlowPanel();
     
+    
     //// Player and opponent areas and card slots
+    /** Panel for player's hand **/
     HorizontalPanel playerCardArea = new HorizontalPanel();
+    /** Panel for player's piles **/
     HorizontalPanel playerPileArea = new HorizontalPanel();
+    /** Panel for opponent's hand **/
     HorizontalPanel opponentCardArea = new HorizontalPanel();
+    /** Panel for opponent's piles **/
     HorizontalPanel opponentPileArea = new HorizontalPanel();
+    /** Individual player card panels **/
     ArrayList<FocusPanel> playerCards = new ArrayList<FocusPanel>(Player.HANDSIZE);
+    /** Labels for player cards **/
     ArrayList<Label> playerCardLabels = new ArrayList<Label>(Player.HANDSIZE);
+    /** Individual opponent card panels **/
     ArrayList<FocusPanel> opponentCards = new ArrayList<FocusPanel>(Player.HANDSIZE);
+    /** Labels for opponent cards **/
     ArrayList<Label> opponentCardLabels = new ArrayList<Label>(Player.HANDSIZE);
-    //Button cardButton = new Button("", this);
+    
+    
     //// Player and opponent piles
+    /** Wrapper panel for player control pile **/
     FlowPanel playerControlWrapper = new FlowPanel();
+    /** Panel for player control pile **/
     FocusPanel playerControl = new FocusPanel();
+    /** Label for player control pile **/
     Label playerControlLabel = new Label();
+    /** Wrapper panel for opponent control pile **/
     FlowPanel opponentControlWrapper = new FlowPanel();
+    /** Panel for opponent control pile **/
     FocusPanel opponentControl = new FocusPanel();
+    /** Label for opponent control pile **/
     Label opponentControlLabel = new Label();
+    
+    /** Wrapper panel for player credit-hour pile **/
     FlowPanel playerCreditHourWrapper = new FlowPanel();
+    /** Panel for player credit-hour pile **/
     FocusPanel playerCreditHour = new FocusPanel();
+    /** Label for player credit-hour pile **/
     Label playerCreditHourLabel = new Label();
+    /** Wrapper panel for opponent credit-hour pile **/
     FlowPanel opponentCreditHourWrapper = new FlowPanel();
+    /** Panel for opponent credit-hour pile **/
     FocusPanel opponentCreditHour = new FocusPanel();
+    /** Label for opponent credit-hour pile **/
     Label opponentCreditHourLabel = new Label();
+    
+    /** Wrapper panel for player probation pile **/
     FlowPanel playerProbationWrapper = new FlowPanel();
+    /** Panel for player probation pile **/
     FocusPanel playerProbation = new FocusPanel();
+    /** Label for player probation pile **/
     Label playerProbationLabel = new Label();
+    /** Wrapper panel for opponent probation pile **/
     FlowPanel opponentProbationWrapper = new FlowPanel();
+    /** Panel for opponent probation pile **/
     FocusPanel opponentProbation = new FocusPanel();
+    /** Label for opponent probation pile **/
     Label opponentProbationLabel = new Label();
+    
+    /** Wrapper panel for player exception pile **/
     FlowPanel playerExceptionWrapper = new FlowPanel();
+    /** Panel for player exception pile **/
     FocusPanel playerException = new FocusPanel();
+    /** Label for player exception pile **/
     Label playerExceptionLabel = new Label();
+    /** Wrapper panel for opponent exception pile **/
     FlowPanel opponentExceptionWrapper = new FlowPanel();
+    /** Panel for opponent exception pile **/
     FocusPanel opponentException = new FocusPanel();
+    /** Label for opponent exception pile **/
     Label opponentExceptionLabel = new Label();
+    
+    /** Dialog box for displaying the contents of piles **/
     DialogBox pileDialog = new DialogBox(true);
+    /** The HTML contents of {@link #pileDialog} **/
     HTML pileDialogContents = new HTML();
     
     //// Deck and discard pile
+    /** Wrapper panel for the deck **/
     FlowPanel deckWrapper = new FlowPanel();
+    /** Panel for the deck card **/
     FlowPanel deck = new FlowPanel();
+    /** Panel for the discard pile **/
     FlowPanel discardPanel = new FlowPanel();
+    /** Label for the discard pile **/
     Label discardLabel = new Label();
+    /** Label showing how many cards are remainign in the deck **/
     Label countRemaining = new Label("Remaining: 0");
     
     //// Player info
+    /** Panel containing the player's info **/
     FlowPanel playerInfo = new FlowPanel();
+    /** Label containing the player's name **/
     Label playerName = new Label("YOU");
+    /** Label containing the player's total credit-hours **/
     Label playerCHTotal = new Label("Credit-Hours: 0");
+    /** Label containing the player's score **/
     Label playerScore = new Label("Score: 0");
+    /** Panel containing the opponent's info  **/
     FlowPanel opponentInfo = new FlowPanel();
+    /** Label containing the opponent's name **/
     Label opponentName = new Label("AI");
+    /** Label containing the opponent's credit-hours **/
     Label opponentCHTotal = new Label("Credit-Hours: 0");
+    /** Label containing the opponent's score **/
     Label opponentScore = new Label("Score: 0");
     
+    /** Panel containing status messages **/
     FlowPanel status = new FlowPanel();
+    /** Button to start the game **/
     Button gameStartButton = new Button("Start New Game");
+    /** Label containing the most recent status message **/
     Label statusMessage = new Label();
     
+    /** Panel for cheat options **/
     FlowPanel cheatPanel = new FlowPanel();
+    /** Check box for showing/hiding opponent cards **/
     CheckBox showOpponentCardsCheckBox = new CheckBox("Show opponent cards");
+    /** Panel containing end after X turns cheat **/
     HorizontalPanel endAfterPanel = new HorizontalPanel();
+    /** Text box for entering how many turns to end after **/
     TextBox endAfterTextBox = new TextBox();
+    /** Label for {@link #endAfterTextBox} **/
     Label endAfterLabel = new Label("End after this many turns (takes effect at end of round)");
+    /** Panel containing starting credit-hours cheat cheat **/
     HorizontalPanel startingCreditHoursPanel = new HorizontalPanel();
+    /** Text box for entering how many credit-hours to start with **/
     TextBox startingCreditHoursTextBox = new TextBox();
+    /** Label for {@link #startingCreditHoursTextBox} **/
     Label startingCreditHoursLabel = new Label("Start with this many credit hours (takes effect at game start)");
     
     // The game elements themselves
@@ -162,6 +237,9 @@ public class Matriculation implements EntryPoint, ClickHandler, KeyDownHandler, 
         startRound();
     }
     
+    /**
+    * Starts the next round by waiting for the user to make their turn.
+    **/
     private void startRound() {
         // Make sure player has cards
         if (human.hand.size() > 0) {
@@ -174,7 +252,6 @@ public class Matriculation implements EntryPoint, ClickHandler, KeyDownHandler, 
     * Plays one round of the game.
     * Human player plays first, followed by the AI.
     * After each turn, checks if a game-ending condition is met and ends the game if so.
-    * @see HumanPlayer#takeTurn(Player)
     * @see AIPlayer#takeTurn(Player)
     **/
     public void endRound() {
@@ -263,6 +340,12 @@ public class Matriculation implements EntryPoint, ClickHandler, KeyDownHandler, 
         status.add(gameStartButton);
     }
     
+    /** 
+    * Adds a card to the appropriate pile.
+    * @param card the card to add
+    * @param player the player playing the card
+    * @param opponent the opponent of player, for the case of setbacks
+    **/
     public void addToPile(Card card, Player player, Player opponent) {
         if (card.type == Card.Type.TERM)
             player.creditHourPile.add(card);
@@ -284,7 +367,10 @@ public class Matriculation implements EntryPoint, ClickHandler, KeyDownHandler, 
             player.exceptionPile.add(card);
     }
     
-    
+    /**
+    * Handles various click events
+    * @param event the triggering event
+    **/
     public void onClick(ClickEvent event) {
         if (event.getSource() == gameStartButton)
             startGame();
@@ -325,6 +411,11 @@ public class Matriculation implements EntryPoint, ClickHandler, KeyDownHandler, 
             }
         }
     }
+    
+    /**
+    * Handles various key down events
+    * @param event the triggering event
+    **/
     public void onKeyDown(KeyDownEvent event) {
         if (event.getSource() == gameStartButton && event.getNativeKeyCode() == KeyCodes.KEY_ENTER)
             startGame();
@@ -343,6 +434,10 @@ public class Matriculation implements EntryPoint, ClickHandler, KeyDownHandler, 
         }
     }
     
+    /**
+    * Handles various key up events
+    * @param event the triggering event
+    **/
     public void onKeyUp(KeyUpEvent event) {
         if (event.getSource() == endAfterTextBox) {
             // update as textbox is updated
@@ -362,6 +457,10 @@ public class Matriculation implements EntryPoint, ClickHandler, KeyDownHandler, 
         }
     }
     
+    /**
+    * Updates the UI to match the details of the game
+    * This includes cards, piles, player info, etc.
+    **/
     private void updateDisplay() {
         // PLAYER CARDS
         Pile hand = human.getHand();
@@ -430,6 +529,12 @@ public class Matriculation implements EntryPoint, ClickHandler, KeyDownHandler, 
         opponentScore.setText("Score: " + ai.getScore());
     }
     
+    /**
+    * Updates the top card of a pile in the UI
+    * @param pile the actual pile object
+    * @param pilePanel the panel containing the pile's UI
+    * @param pileLabel the label for the pile's UI
+    **/
     public void updatePile(Pile pile, FocusPanel pilePanel, Label pileLabel) {
         Card top = pile.top();
         if (top == null) {
@@ -443,6 +548,12 @@ public class Matriculation implements EntryPoint, ClickHandler, KeyDownHandler, 
         }
     }
     
+    /**
+    * Displays the contents of a clicked pile in a dialog box
+    * @param pile the actual pile object
+    * @param owner the player who owns the pile
+    * @param name the name of the pile to write
+    **/
     public void showPileContents(Pile pile, Player owner, String name) {
         if (pile.size() == 0) return;
         
@@ -451,12 +562,21 @@ public class Matriculation implements EntryPoint, ClickHandler, KeyDownHandler, 
         pileDialog.show();
     }
     
+    /**
+    * Puts a message in the status line\
+    * @param message the message to write
+    * @param good true to make the message green, false for red
+    **/    
     private void putStatus(String message, boolean good) {
         statusMessage.setText(message);
         if (good) statusMessage.setStyleName("goodMessage");
         else statusMessage.setStyleName("badMessage");
     }
     
+    
+    /**
+    * Code run when the page is first loaded
+    **/  
     public void onModuleLoad() {
         showOpponentCards = false;
         endAfter = 0;
@@ -605,7 +725,6 @@ public class Matriculation implements EntryPoint, ClickHandler, KeyDownHandler, 
         
         // Set up dialog box showing pile contents
         pileDialog.add(pileDialogContents);
-        pileDialog.hide(true);
         
         // Add the panels to the page
         gameArea.add(opponentArea);
@@ -634,5 +753,7 @@ public class Matriculation implements EntryPoint, ClickHandler, KeyDownHandler, 
         startingCreditHoursPanel.add(startingCreditHoursLabel);
         startingCreditHoursPanel.addStyleName("center");
         cheatPanel.add(startingCreditHoursPanel);
+        
+        pileDialog.show();  // this makes it not show at the beginning for some reason?
     }
 }

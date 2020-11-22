@@ -149,7 +149,6 @@ public abstract class Player {
     
     /**
     * Prints the player's hand to stdout with index values to reference.
-    * @return The player's name.
     **/
     public void listHand() {
         System.out.println("Your hand:");
@@ -160,13 +159,17 @@ public abstract class Player {
         System.out.println();
     }
     
+    /**
+    * Returns the player's hand.
+    * @return The player's hand.
+    **/    
     public Pile getHand() {
         return hand;
     }
     
     /**
     * Returns whether the player has the given exception.
-    * @param exception to check for, given as a constant from {@link Card}
+    * @param setback exception to check for, given as a constant from {@link Card}
     * @return true if the player has the exception for the setback value given
     **/
     public boolean hasException(int setback) {
@@ -189,6 +192,7 @@ public abstract class Player {
     * @param card The card being played.
     * @param opponent The card player's opponent.
     * @return True if the play is valid.
+    * @throws InvalidPlayException if the player can't play the card for any reason
     **/
     public boolean play(Card card, Player opponent) throws InvalidPlayException {
         //try {
@@ -219,6 +223,7 @@ public abstract class Player {
     /**
     * Play a term card
     * @param creditHourChange Number of credit-hours to add.
+    * @throws InvalidPlayException if the player can't play the card for any reason
     **/
     private void playTerm(int creditHourChange) throws InvalidPlayException {
         if (ogreProf) creditHourChange -= OGREPROF_PENALTY;
@@ -241,6 +246,7 @@ public abstract class Player {
     * Play a setback card
     * @param setback Integer representation of the setback to incur.
     * @param target The target of the setback.
+    * @throws InvalidPlayException if the player can't play the card for any reason
     **/
     private void playSetback(int setback, Player target) throws InvalidPlayException {
         // Check if the target has the relevant exception
@@ -265,6 +271,7 @@ public abstract class Player {
     /**
     * Play a fix card
     * @param setback Integer representation of the setback to fix.
+    * @throws InvalidPlayException if the player can't play the card for any reason
     **/
     private void playFix(int setback) throws InvalidPlayException {
         if (setback == Card.CHEATING && activeSetback != Card.CHEATING
@@ -287,7 +294,7 @@ public abstract class Player {
     * Play an exception card
     * @param setback Integer representation of the setback to be excepted from.
     **/
-    private void playException(int setback) throws InvalidPlayException {
+    private void playException(int setback) {
         switch (setback) {
             case Card.CHEATING:
                 exceptions = exceptions | EX_CHEATING;
