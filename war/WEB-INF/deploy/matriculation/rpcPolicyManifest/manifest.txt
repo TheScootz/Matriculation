@@ -1,2 +1,3 @@
 # Module matriculation
 # RPC service class, partial path of RPC policy file
+matriculation.client.MatriculationService, 765EB663280B8662E11E176FA0CCF3EF.gwt.rpc

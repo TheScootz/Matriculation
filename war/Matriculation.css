@@ -74,10 +74,6 @@ h1 {
     opacity: 0.3;
 }
 
-.ogreProf {
-    background-image: url("ogreProf.png");
-}
-
 .playerInfo {
     padding: 50% 0;
 }
@@ -98,6 +94,27 @@ h1 {
     visibility: hidden;
     height: 100%;
     width: 100%;
+}
+
+/** Individual card styles **/
+.CaughtCheating {
+    background-image: url("CaughtCheating.png");
+}
+
+.CarNotWorking {
+    background-image: url("CarNotWorking.jpg");
+}
+
+.AlarmClockBroken {
+    background-image: url("AlarmClockBroken.jpg");
+}
+
+.OgreProf {
+    background-image: url("OgreProf.png");
+}
+
+.PrincessFiona {
+    background-image: url("PrincessFiona.png");
 }
 
 /** Most GWT widgets already have a style name defined */
