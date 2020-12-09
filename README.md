@@ -3,21 +3,29 @@
 Author: Emre Shively
 
 Link: http://eshiv901.kutztown.edu:8080/Matriculation/
+Documentation: https://kuvapcsitrd01.kutztown.edu/~eshiv901/
+Phase 2 version, for comparison: http://eshiv901.kutztown.edu:8080/MatriculationOld/
 
 ## HOW TO PLAY:
-- Rules of the game are at the bottom of this pile.
-- Start a new game by clicking the button labeled "Start New Game" at the bottom.
-- To discard a card, click it and press 'd'.
+- Rules of the game are at the bottom of this file.
+- Start a new game by clicking the button labeled "Start New Game" at the bottom. Choose whether you want to play versus the AI or an online human player.
+- To discard a card, control-click it.
 - To see the contents of a pile, click on it.
 - To activate cheats, click on the opponent's fifth card and press 'c'.
+- The cheat panel provides a way to manually clear out the online session, since the server cannot currently recognize disconnects.
 
-## Planned features for phase 3
-- Multiplayer :O
-- Actual graphics :)
--- This includes cards and pile displays
-- Better discard method?
-- Behind the scenes: try again to separate controller and UI classes
-- Harbor less contempt for webpage styling
+## Design changes I planned but didn't have time to implement
+- Separating the UI and Controller classes
+- Creating an interface for the client controller with separate implementations for online play and solo play, rather than using lots of if-else statements.
+- A MatriculationController interface that MatriculationServer and MatriculationClient would both implement
+- Multiple online games running at once
+-- This would be accomplished with a server controller separate from the main server class. The main server class would have a mapping between client names and their associated game controllers.
+-- Randomized client IDs so that the same name can be used multiple times
+- The ability to reconnect to a game by storing and retrieving session IDs in a cookie
+
+## Unresolved problems
+- I couldn't figure out how to get a result from a remote procedure call and use it as a return value for a function. I worked my way around it but being able to do this would make my code less messy. This also prevented me from using polymorphism well.
+- How to detect client disconnects. This probably requires the use of sockets.
 
 ## THE RULES OF MATRICULATION
 
