@@ -1,4 +1,4 @@
-# MATRICULATION, PHASE 2
+# MATRICULATION
 
 Author: Emre Shively
 
